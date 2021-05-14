@@ -6,10 +6,10 @@ myshell 是使用c语言编写的可以在Linux系统下运行的shell程序，�
 
 1.	可以运行**带参数和不带参数**的命令
 2.	每一行可支持指令总长度不超过**256**个
-3.	myshell支持标准I/O重定向，可以通过管道连接**多个**命令
+3.	myshell支持标准I/O重定向，可以通过管道连接**多个**命令（管道符号和重定向符号与指令之间可以不用空格连接）
 4.	myshell支持指令**后台运行**
 5.	myshell支持使用`cd`命令切换工作路径
-6.	myshell支持使用history命令查看历史指令
+6.	myshell支持使用`history`命令查看历史指令
 7.	项目文件夹里有Makefile文件，通过在目录下执行make指令可以生成myshell.o可执行文件，运行该文件即可启动myshell程序，执行make clean指令即可删除该可执行程序
 8.	myshell支持使用**exit**或**logout**指令退出
 
@@ -19,14 +19,15 @@ myshell 是使用c语言编写的可以在Linux系统下运行的shell程序，�
 
 #### 1. 功能实现所需的系统调用
 
-| 实现功能                        | 实现函数                                                 | 系统调用                         |
-| ------------------------------- | -------------------------------------------------------- | -------------------------------- |
-| cd命令（切换工作目录）          | int dealCd(int argc)                                     | getcwd(), chdir()                |
-| history命令（查看过去输入指令） | int getHistory()                                         | /                                |
-| 输入重定向（<)                  | void deal_with_command(int argcount, ...)                | fork(), dup2(), open(), execvp() |
-| （追加）输出重定向（>/>>）      | void deal_with_command(int argcount, ...)                | fork(), dup2(), open(), execvp() |
-| 管道(\|)                        | void split_command(int argct, char argl`[100][BUFSIZE]`) | fork(), dup2(), open(),write()   |
-| 指令后台运行（&）               | void split_command(int argct, char argl`[100][BUFSIZE]`) | fork(), waitpid()                |
+| 实现功能                        | 实现函数                                                 | 系统调用                                          |
+| ------------------------------- | -------------------------------------------------------- | ------------------------------------------------- |
+| cd命令（切换工作目录）          | int dealCd(int argc)                                     | getcwd(), chdir()                                 |
+| history命令（查看过去输入指令） | int getHistory()                                         | /                                                 |
+| 输入重定向（<)                  | void deal_with_command(int argcount, ...)                | fork(), dup2(), open(), execvp(), exit()，close() |
+| （追加）输出重定向（>/>>）      | void deal_with_command(int argcount, ...)                | fork(), dup2(), open(), execvp(),exit(), close()  |
+| 管道(\|)                        | void split_command(int argct, char argl`[100][BUFSIZE]`) | fork(), dup2(), open(),write(), exit(), close()   |
+| 指令后台运行（&）               | void split_command(int argct, char argl`[100][BUFSIZE]`) | fork(), waitpid(), exit()                         |
+| 退出shell                       | int main()                                               | exit()                                            |
 
 
 
@@ -52,10 +53,31 @@ myshell 是使用c语言编写的可以在Linux系统下运行的shell程序，�
 
 
 
-### 三、输入输出规范
+#### 4. 功能的实现
 
-* 支持管道和重定向符号与命令之间不带空格
-* 
+1. cd命令实现
+
+   使用chdir系统调用切换当前进程工作目录，并使用getcwd系统调用获取当前工作目录（**一定要在父进程中而不能在子进程中！**）
+
+2. 管道和重定向的实现
+
+   在实现重定向时，使用open系统调用打开重定向的目标文件，并使用dup2系统调用将其与标准输入或标准输出等相连接，执行指令。
+
+   在实现管道时，分别在tmp文件夹下使用open打开youdontknowfile和youdontknowfiile1两个文件，使用dup2系统调用将其分别与标准输入和标准输出相连接，将其作为输入的来源或输出的目的，当多个管道连接时，分别从这两个文件进行输入输出。
+
+3. 指令后台运行的实现
+
+   在执行split_command()函数时会重新开启一个子进程，在未获取到'&'时，父进程会等待子进程正确结束后返回，shell重新运行，用户需要等到指令执行结束后才能够重新输入指令；如果在输入指令中含有'&'时，父进程不会等待子进程运行结束，而会直接返回，此时用户可以在上一条指令未执行结束时输入指令。
+
+   
+
+### 三、shell运行示例
+
+如图，该shell能够在Ubuntu环境下运行，部分指令结果如下：
+
+![example](C:\Users\ZIMUQIN\Learning\计算机类课程\Unix\example.jpg)
+
+
 
 ### 四、源代码
 
