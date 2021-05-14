@@ -138,7 +138,7 @@ void split_command(int argct, char argl[100][BUFSIZE]) {
 	if (strcmp(argv[0],"cd") == 0) {
  		int res = dealCd(argc);
  		if (!res) {
- 			printf("wrong input");
+ 			printf("wrong input!\n");
 		 }
  		return;
 	}
@@ -149,7 +149,7 @@ void split_command(int argct, char argl[100][BUFSIZE]) {
 			argct = argct - 1;
 		}
 		else if (strcmp(argl[i], "&") == 0){
-			printf("wrong command\n");
+			printf("wrong command!\n");
 			return;
 		}
 	}
@@ -252,7 +252,7 @@ void deal_with_command(int argcount, char arglist[100][BUFSIZE], int isstart, in
 				break;
 			}
 			else {
-				printf("wrong command\n");
+				printf("wrong command!\n");
 				return ;
 			}
 		}
@@ -281,7 +281,7 @@ void deal_with_command(int argcount, char arglist[100][BUFSIZE], int isstart, in
 	
 	 
 	if (flag > 1) {
-		printf("wrong command\n");
+		printf("wrong command!\n");
 		return;
 	}
  
@@ -303,7 +303,7 @@ void deal_with_command(int argcount, char arglist[100][BUFSIZE], int isstart, in
 		}
 	}
  	if ( (pid = fork()) < 0 ) {
-		printf("fork not success\n");
+		printf("error! fork failed!\n");
 		return;
 	}
  
@@ -312,7 +312,7 @@ void deal_with_command(int argcount, char arglist[100][BUFSIZE], int isstart, in
 			//让子进程执行 
 			if (pid == 0) {
 				if (!(find_command(argpp[0])) ) {
-					printf("%s : command not found\n", argpp[0]);
+					printf("%s : command not found1\n", argpp[0]);
 					exit (0);
 				}
 				fd2 = open("/tmp/youdonotknowfile",O_RDONLY);
@@ -427,7 +427,7 @@ int find_command (char *command)
 int dealCd(int argc) {
 	int result = 1;
     if (argc != 2) {
-        printf("the command is wrong:please input 'cd dir'");
+        printf("the command is wrong:please input 'cd dir'\n");
     } 
 	else {
         int ret = chdir(argv[1]);
@@ -438,7 +438,7 @@ int dealCd(int argc) {
 	if (result) {
         char* res = getcwd(current, BUFSIZE);
         if (res == NULL) {
-            printf("wrong path! please enter a existed directory");
+            printf("wrong path! please enter a existed directory\n");
         }
         return result;
     }
@@ -455,7 +455,7 @@ int getHistory() {
 		n = 10;
 	}
 	else {
-		printf("wrong input: please enter history [commandsNum]");
+		printf("wrong input: please enter history [commandsNum]\n");
 		return 0;
 	}
 

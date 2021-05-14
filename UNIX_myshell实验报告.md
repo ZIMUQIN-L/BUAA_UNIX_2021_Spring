@@ -9,7 +9,7 @@ myshell 是使用c语言编写的可以在Linux系统下运行的shell程序，�
 3.	myshell支持标准I/O重定向，可以通过管道连接**多个**命令
 4.	myshell支持指令**后台运行**
 5.	myshell支持使用`cd`命令切换工作路径
-6.	myshell支持使用history指令查看历史指令
+6.	myshell支持使用history命令查看历史指令
 7.	项目文件夹里有Makefile文件，通过在目录下执行make指令可以生成myshell.o可执行文件，运行该文件即可启动myshell程序，执行make clean指令即可删除该可执行程序
 8.	myshell支持使用**exit**或**logout**指令退出
 
@@ -52,7 +52,12 @@ myshell 是使用c语言编写的可以在Linux系统下运行的shell程序，�
 
 
 
-### 三、源代码
+### 三、输入输出规范
+
+* 支持管道和重定向符号与命令之间不带空格
+* 
+
+### 四、源代码
 
 ```c
 #include <stdio.h>
@@ -192,16 +197,25 @@ void split_command(int argct, char argl[100][BUFSIZE]) {
 	int isstart = 0;
 	pid_t pid44;
 	
+	if (strcmp(argv[0],"cd") == 0) {
+ 		int res = dealCd(argc);
+ 		if (!res) {
+ 			printf("wrong input!\n");
+		 }
+ 		return;
+	}
+	
 	for (i = 0; i < argct; i++) {
 		if (strcmp(argl[i], "&") == 0 && i == argct - 1) {
 			background = 1;
 			argct = argct - 1;
 		}
 		else if (strcmp(argl[i], "&") == 0){
-			printf("wrong command\n");
+			printf("wrong command!\n");
 			return;
 		}
 	}
+	
 	pid44 = fork();
 	if (pid44 == 0) {
 		for (i = 0; i < argct; i++) {
@@ -231,12 +245,12 @@ void split_command(int argct, char argl[100][BUFSIZE]) {
 				fd2 = open("/tmp/youdonotknowfile",
 						O_WRONLY|O_CREAT|O_TRUNC,0644);
 				char buffer[1024] = {0};
-			    char *ptr;
+			    	char *ptr;
  			   	int count;
 				while (count = read(fd3, buffer, 1024))    
 				{
 			        ptr = buffer;
-					write(fd2, ptr, count);
+			        write(fd2, ptr, count);
 			        memset(buffer, 0, 1024);
  				}
  				//}
@@ -285,14 +299,6 @@ void deal_with_command(int argcount, char arglist[100][BUFSIZE], int isstart, in
 	char* file;
 	pid_t pid;
  
- 	if (strcmp(argv[0],"cd") == 0) {
- 		int res = dealCd(argc);
- 		if (!res) {
- 			printf("wrong input");
-		 }
- 		return;
-	}
-	
 	//get the command
 	for (i=0; i < argcount; i++) {
 		argpp[i] = (char *) arglist[i];
@@ -308,7 +314,7 @@ void deal_with_command(int argcount, char arglist[100][BUFSIZE], int isstart, in
 				break;
 			}
 			else {
-				printf("wrong command\n");
+				printf("wrong command!\n");
 				return ;
 			}
 		}
@@ -337,7 +343,7 @@ void deal_with_command(int argcount, char arglist[100][BUFSIZE], int isstart, in
 	
 	 
 	if (flag > 1) {
-		printf("wrong command\n");
+		printf("wrong command!\n");
 		return;
 	}
  
@@ -368,7 +374,7 @@ void deal_with_command(int argcount, char arglist[100][BUFSIZE], int isstart, in
 			//让子进程执行 
 			if (pid == 0) {
 				if (!(find_command(argpp[0])) ) {
-					printf("%s : command not found\n", argpp[0]);
+					printf("%s : command not found1\n", argpp[0]);
 					exit (0);
 				}
 				fd2 = open("/tmp/youdonotknowfile",O_RDONLY);
@@ -483,7 +489,7 @@ int find_command (char *command)
 int dealCd(int argc) {
 	int result = 1;
     if (argc != 2) {
-        printf("the command is wrong:please input 'cd dir'");
+        printf("the command is wrong:please input 'cd dir'\n");
     } 
 	else {
         int ret = chdir(argv[1]);
@@ -494,7 +500,7 @@ int dealCd(int argc) {
 	if (result) {
         char* res = getcwd(current, BUFSIZE);
         if (res == NULL) {
-            printf("wrong path! please enter a existed directory");
+            printf("wrong path! please enter a existed directory\n");
         }
         return result;
     }
@@ -511,7 +517,7 @@ int getHistory() {
 		n = 10;
 	}
 	else {
-		printf("wrong input: please enter history [commandsNum]");
+		printf("wrong input: please enter history [commandsNum]\n");
 		return 0;
 	}
 
